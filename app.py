@@ -6,7 +6,7 @@ from pymessenger import Bot
 app = Flask(__name__)
 
 PAGE_ACCESS_TOKEN = "EAAbbVAxRX3oBAJyGezTZBJOECyyIMxJU50A5gODBZBtMDLiXZCxLZAofWOsiQtBOjBNH0YwyZAYzK3ZCQ8tgDJJTSWjtZBOZA4zUFURwREqcYeIEyfvxWMxDi9DKL011gmn1svsngNxZBDHvoWpZAheZCksdQEElfqnbz62JO5XwjaZC4gZDZD"
-
+NO = None
 bot = Bot(PAGE_ACCESS_TOKEN)
 
 
@@ -43,14 +43,14 @@ def webhook():
 					# Echo
 					#response = messaging_text
 					#bot.send_text_message(sender_id, response)
-                    response = None
+                    response = NO
 
                     entity, value = wit_response(messaging_text)
                     if entity == "location":
                         response = "Intersting, so what city in {} you come from? ".format(str(value))
                     if response == None:
                         respones = "Sorry I don't understand"
-                    
+
                     bot.send_text_message(sender_id,response)
 
 
