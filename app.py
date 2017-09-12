@@ -48,15 +48,15 @@ def webhook():
 					# Echo
 					# response = messaging_text
 					# bot.send_text_message(sender_id, response)
-                response = None
+                    response = None
 
-                entity, value = wit_response(messaging_text)
-                if entity == "location":
-                   response = "Intersting, so what city in {} you come from? ".format(str(value))
-                if response == None:
-                   respones = "Sorry I don't understand"
+                    entity, value = wit_response(messaging_text)
+                    if entity == "location":
+                        response = "Intersting, so what city in {} you come from? ".format(str(value))
+                    if response == None:
+                        respones = "Sorry I don't understand"
 
-                bot.send_text_message(sender_id,response)
+                    bot.send_text_message(sender_id,response)
 
 
     return "ok", 200
