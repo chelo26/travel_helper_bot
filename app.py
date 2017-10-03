@@ -29,6 +29,7 @@ def webhook():
 
     data = request.get_json()
     log(data)
+    print(data)
     if data['object'] == 'page':
 
         for entry in data['entry']:
