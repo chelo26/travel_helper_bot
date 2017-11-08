@@ -1,1 +1,5 @@
 env_chat/
+creds.py
+old_app.py
+test_db.py
+__pycache__/
