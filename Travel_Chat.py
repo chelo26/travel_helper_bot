@@ -1,6 +1,6 @@
 # Class that implements the answers to the conversation:
 from utils import wit_response
-
+from datetime import datetime
 # Creating a message object that can contain image or text :
 class Message():
     def __init__(self,message_event):
@@ -34,13 +34,14 @@ class Conversational_Bot():
         self.last_message_time = None
     # Parsing the json received
     def parse_json_message(self,data):
-
-        if data['object'] == 'page':
-
-            for entry in data['entry']:
-                for messaging_event in entry['messaging']:
+        if  data.get('object') == 'page':
+            entry = data.get("entry")[0]
+            messaging = entry.get("messaging")
+            if messaging:
+                messaging = messaging[0]
+                if messaging.get("message"):
                     # creating the message object:
-                    current_message = self.last_message = Message(messaging_event)
+                    current_message = self.last_message = Message(messaging)
                     #self.last_message = Message(messaging_event)
                     # IDs
                     #sender_id = self.last_sender_id = current_message.sender_id
@@ -53,15 +54,16 @@ class Conversational_Bot():
                     # Timestamp:
                     self.last_message_time = current_message.timestamp
 
-    def generate_post_data(self):
+
+    def generate_post(self):
         post = {"sender_id": self.last_sender_id,
-                "recipient_id": self.last_recipient_id,
+                #"recipient_id": self.last_recipient_id,
                 "message": self.last_message_text,
-                "timestamp":self.last_message_time}
+                "timestamp": datetime.utcnow()}
         return post
-    def store_message(self,db):
-        message_to_post = self.generate_post_data()
-        db.insert(message_to_post)
+    def store_message(self,db,post):
+        #message_to_post = self.generate_post()
+        db.insert(post)
 
     def find_last_message_received(self,db,sender_id):
         message_entry = db.find({"sender_id":sender_id}).sort("timestamp",-1).limit(1)
