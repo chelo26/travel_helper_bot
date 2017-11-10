@@ -57,7 +57,7 @@ class Conversational_Bot():
 
     def generate_post(self):
         post = {"sender_id": self.last_sender_id,
-                #"recipient_id": self.last_recipient_id,
+                "recipient_id": self.last_recipient_id,
                 "message": self.last_message_text,
                 "timestamp": datetime.utcnow()}
         return post

@@ -1,7 +1,7 @@
 import os, sys
 import pprint
 from flask import Flask, request
-from Travel_Chat import *
+from MessageHandlerBot import MessageHandlerBot
 from pymongo import MongoClient
 import creds as CR
 from pymessenger import Bot
@@ -31,51 +31,9 @@ def generate_post(sender_id,message):
             "timestamp": datetime.utcnow()}
     return post
 
-def get_message_type(message_event):
-    entry = message_event["entry"][0]
-    messaging = entry.get("messaging")
-    ## ADD POSTBACK type, so we can reply to it!!!!
-    print("messaging ", messaging)
-    if messaging:
-        message = messaging[0].get("message")
-        if message:
-            print("message" , message)
-            if len(message) == 3:
-                text = message["text"]
-                return text,True
-            else:
-                return None,False
-        elif messaging[0].get("postback"):
-            message = messaging[0].get("postback")
-            payload = message["payload"]
-            return payload,True
-        else:
-            return None,False
-    else:
-        return None,False
-
-def parse_message_sent(message_event):
-    entry = message_event["entry"][0]
-    messaging = entry.get("messaging")
-    print("messaging ", messaging)
-    if messaging:
-        message = messaging[0].get("message")
-        if message:
-            print("message" , message)
-            if len(message) == 3:
-                text = message["text"]
-                return text,True
-            else:
-                return None,False
-        else:
-            return None,False
-    else:
-        return None,False
-
-
 # Find an answer:
 
-def answer_to_message(responder_bot,sender_id,last_message_received,last_message_sent):
+def answer_to_message(last_message_received,last_message_sent):
     # Cleaning message:
     if last_message_sent:
         last_message_sent = clean_message(last_message_sent)
@@ -97,12 +55,17 @@ def answer_to_message(responder_bot,sender_id,last_message_received,last_message
             }]
 
     if last_message_received in GREETINGS:
-        responder_bot.send_text_message(sender_id,saludo)
-        return saludo
+        return (saludo,"text")
+
     elif "yes" in last_message_received: #and last_message_sent == saludo:
-        options_offering = "great, I can offer you:"
-        responder_bot.send_button_message(sender_id,options_offering,buttons)
-        return options_offering
+        offers = "great, I can offer you:"
+        return (offers,buttons,"options")
+
+    elif last_message_received =="otro":
+        return ("what ? ","text")
+
+    else:
+        return ("To complete","text")
 
 
 
@@ -110,7 +73,7 @@ def answer_to_message(responder_bot,sender_id,last_message_received,last_message
 # Messages database:
 messages_table = point_collection()
 # Bots:
-listener_bot = Conversational_Bot()
+#listener_bot = MessageHandlerBot()
 responder_bot = Bot(CR.PAGE_ACCESS_TOKEN)
 
 
@@ -131,34 +94,48 @@ def verify():
 def webhook():
     # Get the message in Json format:
 
-    message = request.get_json()
-    #print("message event received: ")
-    pprint.pprint(message)
-    text,send_back_bool = get_message_type(message)
+    message_event = request.get_json()
+    print("message event received: ")
+    pprint.pprint(message_event)
+    print("")
+    print("")
+    # Parse message:
+
+    # 1. Bot parses the message
+    listener_bot = MessageHandlerBot()
+    # If it receives a text message or a payload message:
+    text,send_back_bool = listener_bot.parse_json_message(message_event)
+    print("text : ", text)
+    print("send back bool : ", send_back_bool)
+    print("")
+
+    # If we should message back:
     if send_back_bool == True:
 
-        pprint.pprint(message)
-        # 1. Bot parses the message
-        listener_bot.parse_json_message(message)
         # 2. Bot stores the message
         post = listener_bot.generate_post()
         listener_bot.store_message(messages_table,post)
         # 3.Finding the sender_id:
-        sender_id = listener_bot.last_sender_id
+        sender_id = listener_bot.sender_id
         # 3.2 Finding last messages:
-        last_message_received = listener_bot.find_last_message_received(messages_table,sender_id)
-        last_message_sent = listener_bot.find_last_message_sent(messages_table,sender_id)
+        #last_message_received = listener_bot.find_last_message_received(messages_table,sender_id)
+        last_message_received = text
+        last_message_sent = listener_bot.find_last_message_sent(messages_table)
+        print("last message sent : ", last_message_sent)
         # 4. Sending the answer:
-        text, send_back_bool = get_message_type(message)
-        print("text: ",text)
-        print("send_back ? : ",send_back_bool)
-        #if send_back_bool == True:
-        print("text : ", text)
-        thing_sent = answer_to_message(responder_bot,sender_id,last_message_received,last_message_sent)
-        post = generate_post(sender_id,thing_sent)
+        answer_tuple = answer_to_message(last_message_received,last_message_sent)
+        post = generate_post(sender_id,answer_tuple[0])
         listener_bot.store_message(messages_table,post)
-        #responder_bot.send_text_message(2120553661303424,text)
-
+        if len(answer_tuple) == 2:
+            text = answer_tuple[0]
+            print("")
+            print("text to send: ",text)
+            print("")
+            responder_bot.send_text_message(sender_id,text)
+        else:
+            offers = answer_tuple[0]
+            buttons = answer_tuple[1]
+            responder_bot.send_button_message(sender_id,offers,buttons)
     else:
         pass
 
