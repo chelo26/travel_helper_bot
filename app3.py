@@ -43,16 +43,22 @@ def answer_to_message(last_message_received,last_message_sent):
     # Different messages:
     saludo = "hi! are you traveling in Bolivia?"
     buttons = [
-          {
+            {
             "type":"web_url",
             "url":"http://www.paginasiete.bo/",
             "title":"Bolivian News"
             },
-          {
-            "type": "postback",
-            "title": "otro",
-            "payload": "otro"
-            }]
+            {
+              "type":"web_url",
+              "url":"http://www.paginasiete.bo/",
+              "title":"Bolivian News"
+              },
+
+              {
+                "type": "postback",
+                "title": "otro",
+                "payload": "balbal"
+               }]
 
     if last_message_received in GREETINGS:
         return (saludo,"text")
