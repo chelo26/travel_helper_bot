@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, sys
 import pprint
 from flask import Flask, request

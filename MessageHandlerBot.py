@@ -1,4 +1,5 @@
 # Class that implements the answers to the conversation:
+# -*- coding: utf-8 -*-
 from utils import wit_response
 from datetime import datetime
 # Creating a message object that can contain image or text :
