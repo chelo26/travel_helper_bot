@@ -1,3 +1,4 @@
+
 env_chat/
 creds.py
 old_app.py
@@ -5,4 +6,6 @@ test_db.py
 __pycache__/
 aws_key.pem
 llamita_key.pem
-myenv/
+
+
+
