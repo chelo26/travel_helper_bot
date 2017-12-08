@@ -1,4 +1,5 @@
-from app3 import app as application
+
+from test_flask import test_flask
 
 if __name__ == "__main__":
-    application.run()
+    test_flask.run()
