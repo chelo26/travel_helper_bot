@@ -13,6 +13,8 @@ from datetime import datetime
 GREETINGS = set(["salut!","salut","hello","hi","holaa","hola","hey","holas","heyy","hii","hiii"])
 
 
+
+
 # Initialize database:
 def point_collection():
     client = MongoClient(CR.mongo_host,CR.mongo_port)
